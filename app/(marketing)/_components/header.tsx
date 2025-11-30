@@ -52,7 +52,7 @@ export const HeroHeader = () => {
 									height={32}
 									className="rounded-sm"
 								/>
-								<span className="text-2xl font-bold">Syncora</span>
+								<span className="text-2xl font-bold">Syncom</span>
 							</Link>
 
 							<button

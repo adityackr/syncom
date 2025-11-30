@@ -134,7 +134,7 @@ export default function HeroSection() {
 									as="p"
 									className="mx-auto mt-8 max-w-2xl text-balance text-lg"
 								>
-									Syncora organizes conversations into channels with threads, is
+									Syncom organizes conversations into channels with threads, is
 									realtime, and uses AI to keep your teams in sync.
 								</TextEffect>
 
