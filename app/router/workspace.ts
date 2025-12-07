@@ -7,7 +7,7 @@ import { standardSecurityMiddleware } from '../middlewares/arcjet/standard.middl
 import { requiredAuthMiddleware } from '../middlewares/auth.middleware';
 import { base } from '../middlewares/base.middleware';
 import { requiredWorkspaceMiddleware } from '../middlewares/workspace.middleware';
-import { workspaceSchema } from '../schemas/workspace';
+import { workspaceSchema } from '../schemas/workspace.schema';
 
 export const listWorkspaces = base
 	.use(requiredAuthMiddleware)

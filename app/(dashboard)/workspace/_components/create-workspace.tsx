@@ -1,6 +1,9 @@
 'use client';
 
-import { type Workspace, workspaceSchema } from '@/app/schemas/workspace';
+import {
+	type Workspace,
+	workspaceSchema,
+} from '@/app/schemas/workspace.schema';
 import { Button } from '@/components/ui/button';
 import {
 	Dialog,
