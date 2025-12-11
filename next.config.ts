@@ -8,6 +8,16 @@ const nextConfig: NextConfig = {
 				hostname: 'avatar.vercel.sh',
 				pathname: '/**',
 			},
+			{
+				protocol: 'https',
+				hostname: '*.googleusercontent.com',
+				pathname: '/**',
+			},
+			{
+				protocol: 'https',
+				hostname: 'avatar.vercel.sh',
+				pathname: '/**',
+			},
 		],
 	},
 };

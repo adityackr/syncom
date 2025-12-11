@@ -23,13 +23,18 @@ import {
 	FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { orpc } from '@/lib/orpc';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { isDefinedError } from '@orpc/client';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 export const CreateNewChannel = () => {
 	const [open, setOpen] = useState(false);
+	const queryClient = useQueryClient();
 
 	const form = useForm({
 		resolver: zodResolver(ChannelNameSchema),
@@ -38,22 +43,27 @@ export const CreateNewChannel = () => {
 		},
 	});
 
-	// const createChannelMutation = useMutation(
-	// 	orpc.channel.create.mutationOptions({
-	// 		onSuccess: (newChannel) => {
-	// 			toast.success(`Channel ${newChannel.name} created successfully`);
-	// 			form.reset();
-	// 			setOpen(false);
-	// 		},
-	// 		onError: (error) => {
-	// 			if (isDefinedError(error)) {
-	// 				toast.error(error.message);
-	// 				return;
-	// 			}
-	// 			toast.error('Failed to create channel. Please try again later.');
-	// 		},
-	// 	})
-	// );
+	const createChannelMutation = useMutation(
+		orpc.channel.create.mutationOptions({
+			onSuccess: (newChannel) => {
+				toast.success(`Channel ${newChannel.name} created successfully`);
+
+				queryClient.invalidateQueries({
+					queryKey: orpc.channel.list.queryKey(),
+				});
+
+				form.reset();
+				setOpen(false);
+			},
+			onError: (error) => {
+				if (isDefinedError(error)) {
+					toast.error(error.message);
+					return;
+				}
+				toast.error('Failed to create channel. Please try again later.');
+			},
+		})
+	);
 
 	// eslint-disable-next-line react-hooks/incompatible-library
 	const watchedName = form.watch('name');
@@ -62,7 +72,7 @@ export const CreateNewChannel = () => {
 		: '';
 
 	const onSubmit = (data: ChannelName) => {
-		console.log(data);
+		createChannelMutation.mutate(data);
 	};
 
 	return (
@@ -105,7 +115,11 @@ export const CreateNewChannel = () => {
 							)}
 						/>
 						<div className="flex justify-end">
-							<Button type="submit">Create New Channel</Button>
+							<Button disabled={createChannelMutation.isPending} type="submit">
+								{createChannelMutation.isPending
+									? 'Creating...'
+									: 'Create New Channel'}
+							</Button>
 						</div>
 					</form>
 				</Form>
