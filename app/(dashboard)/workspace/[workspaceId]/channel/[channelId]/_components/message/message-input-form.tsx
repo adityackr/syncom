@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/form';
 import { orpc } from '@/lib/orpc';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FC } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -21,6 +21,8 @@ type MessageInputFormProps = {
 };
 
 export const MessageInputForm: FC<MessageInputFormProps> = ({ channelId }) => {
+	const queryClient = useQueryClient();
+
 	const form = useForm<CreateMessage>({
 		resolver: zodResolver(CreateMessageSchema),
 		defaultValues: {
@@ -32,10 +34,16 @@ export const MessageInputForm: FC<MessageInputFormProps> = ({ channelId }) => {
 	const createMessageMutation = useMutation(
 		orpc.message.create.mutationOptions({
 			onSuccess: () => {
+				queryClient.invalidateQueries({
+					queryKey: orpc.message.list.key(),
+				});
 				return toast.success('Message sent successfully');
 			},
-			onError: () => {
-				return toast.error('Failed to send message');
+			onError: (error) => {
+				console.error('Message creation error:', error);
+				return toast.error(
+					`Failed to send message: ${error.message || 'Unknown error'}`
+				);
 			},
 		})
 	);
@@ -54,8 +62,10 @@ export const MessageInputForm: FC<MessageInputFormProps> = ({ channelId }) => {
 						<FormItem>
 							<FormControl>
 								<MessageComposer
+									onSubmit={() => handleSubmit(form.getValues())}
 									value={field.value || ''}
 									onChange={field.onChange}
+									isSubmitting={createMessageMutation.isPending}
 								/>
 							</FormControl>
 							<FormMessage />
