@@ -23,6 +23,11 @@ const nextConfig: NextConfig = {
 				hostname: 'github.com',
 				pathname: '/**',
 			},
+			{
+				protocol: 'https',
+				hostname: 'nwv08qvo4i.ufs.sh',
+				pathname: '/**',
+			},
 		],
 	},
 };

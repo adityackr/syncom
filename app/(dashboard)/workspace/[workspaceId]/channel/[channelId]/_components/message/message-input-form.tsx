@@ -8,6 +8,7 @@ import {
 	FormItem,
 	FormMessage,
 } from '@/components/ui/form';
+import { useAttachmentUpload } from '@/hooks/use-attachment-upload';
 import { orpc } from '@/lib/orpc';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -23,6 +24,8 @@ type MessageInputFormProps = {
 export const MessageInputForm: FC<MessageInputFormProps> = ({ channelId }) => {
 	const queryClient = useQueryClient();
 	const [editorKey, setEditorKey] = useState(0);
+
+	const upload = useAttachmentUpload();
 
 	const form = useForm<CreateMessage>({
 		resolver: zodResolver(CreateMessageSchema),
@@ -40,6 +43,7 @@ export const MessageInputForm: FC<MessageInputFormProps> = ({ channelId }) => {
 				});
 
 				form.reset({ channelId, content: '' });
+				upload.clear();
 				setEditorKey((prev) => prev + 1);
 
 				return toast.success('Message sent successfully');
@@ -54,7 +58,10 @@ export const MessageInputForm: FC<MessageInputFormProps> = ({ channelId }) => {
 	);
 
 	const handleSubmit = (data: CreateMessage) => {
-		createMessageMutation.mutate(data);
+		createMessageMutation.mutate({
+			...data,
+			imageUrl: upload.stagedUrl ?? undefined,
+		});
 	};
 
 	return (
@@ -72,6 +79,7 @@ export const MessageInputForm: FC<MessageInputFormProps> = ({ channelId }) => {
 									value={field.value || ''}
 									onChange={field.onChange}
 									isSubmitting={createMessageMutation.isPending}
+									upload={upload}
 								/>
 							</FormControl>
 							<FormMessage />

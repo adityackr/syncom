@@ -23,7 +23,7 @@ export const MessageList = () => {
 	return (
 		<div className="relative h-full">
 			<div
-				className="h-full overflow-y-auto"
+				className="h-full overflow-y-auto flex flex-col space-y-1"
 				ref={scrollRef}
 				onScroll={handleScroll}
 			>

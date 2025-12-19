@@ -44,6 +44,7 @@ export const createMessage = base
 				authorEmail: context.user.email!,
 				authorName: context.user.given_name ?? 'John Doe',
 				authorAvatar: getAvatar(context.user.picture, context.user.email!),
+				imageUrl: input.imageUrl,
 			},
 		});
 
