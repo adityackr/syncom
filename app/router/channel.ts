@@ -1,6 +1,6 @@
 import prisma from '@/lib/db';
 import { Channel } from '@/lib/generated/prisma/client';
-import { KindeOrganization } from '@kinde-oss/kinde-auth-nextjs';
+import { KindeOrganization, KindeUser } from '@kinde-oss/kinde-auth-nextjs';
 import {
 	init,
 	organization_user,
@@ -8,6 +8,7 @@ import {
 } from '@kinde/management-api-js';
 import z from 'zod';
 import { heavyWriteSecurityMiddleware } from '../middlewares/arcjet/heavy-write.middleware';
+import { readSecurityMiddleware } from '../middlewares/arcjet/read';
 import { standardSecurityMiddleware } from '../middlewares/arcjet/standard.middleware';
 import { requiredAuthMiddleware } from '../middlewares/auth.middleware';
 import { base } from '../middlewares/base.middleware';
@@ -80,5 +81,44 @@ export const listChannels = base
 			channels,
 			members,
 			currentWorkspace: context.workspace,
+		};
+	});
+
+export const getChannel = base
+	.use(requiredAuthMiddleware)
+	.use(requiredWorkspaceMiddleware)
+	.use(standardSecurityMiddleware)
+	.use(readSecurityMiddleware)
+	.route({
+		method: 'GET',
+		path: '/channels/:channelId',
+		summary: 'Get a channel',
+		tags: ['channels'],
+	})
+	.input(z.object({ channelId: z.string() }))
+	.output(
+		z.object({
+			channelName: z.string(),
+			currentUser: z.custom<KindeUser<Record<string, unknown>>>(),
+		})
+	)
+	.handler(async ({ input, context, errors }) => {
+		const channel = await prisma.channel.findUnique({
+			where: {
+				id: input.channelId,
+				workspaceId: context.workspace.orgCode,
+			},
+			select: {
+				name: true,
+			},
+		});
+
+		if (!channel) {
+			throw errors.NOT_FOUND;
+		}
+
+		return {
+			channelName: channel.name,
+			currentUser: context.user,
 		};
 	});
