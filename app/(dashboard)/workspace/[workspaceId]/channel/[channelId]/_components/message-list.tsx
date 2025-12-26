@@ -80,7 +80,6 @@ const useMessageList = (channelId: string) => {
 	const bottomRef = useRef<HTMLDivElement | null>(null);
 	const lastItemIdRef = useRef<string | undefined>(undefined);
 	const [isAtBottom, setIsAtBottom] = useState(false);
-	const [newMessages, setNewMessages] = useState(false);
 
 	const infiniteOptions = orpc.message.list.infiniteOptions({
 		input: (pageParam: string | undefined) => ({
@@ -200,10 +199,7 @@ const useMessageList = (channelId: string) => {
 					el.scrollTop = el.scrollHeight;
 				});
 
-				setNewMessages(false);
 				setIsAtBottom(true);
-			} else {
-				setNewMessages(true);
 			}
 		}
 
@@ -232,7 +228,6 @@ const useMessageList = (channelId: string) => {
 		const el = scrollRef.current;
 		if (!el) return;
 		bottomRef.current?.scrollIntoView({ block: 'end', behavior: 'smooth' });
-		setNewMessages(false);
 		setIsAtBottom(true);
 	};
 
@@ -242,7 +237,6 @@ const useMessageList = (channelId: string) => {
 		bottomRef,
 		handleScroll,
 		scrollToBottom,
-		newMessages,
 		isAtBottom,
 		isEmpty,
 		isFetchingNextPage,

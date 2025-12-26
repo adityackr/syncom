@@ -103,7 +103,9 @@ export const InviteMember = () => {
 						/>
 
 						<div className="flex justify-end">
-							<Button type="submit">Send Invitation</Button>
+							<Button type="submit" disabled={inviteMutation.isPending}>
+								{inviteMutation.isPending ? 'Sending...' : 'Send Invitation'}
+							</Button>
 						</div>
 					</form>
 				</Form>
