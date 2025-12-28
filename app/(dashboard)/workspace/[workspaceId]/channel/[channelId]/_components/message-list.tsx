@@ -4,7 +4,7 @@
 import { EmptyState } from '@/components/common/empty-state';
 import { Button } from '@/components/ui/button';
 import { orpc } from '@/lib/orpc';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { ChevronDown, Loader2 } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -21,6 +21,7 @@ export const MessageList = () => {
 		isAtBottom,
 		isEmpty,
 		isFetchingNextPage,
+		user,
 	} = useMessageList(channelId);
 
 	return (
@@ -41,7 +42,11 @@ export const MessageList = () => {
 					</div>
 				) : (
 					messages?.map((message) => (
-						<MessageItem key={message.id} message={message} />
+						<MessageItem
+							key={message.id}
+							message={message}
+							currentUserId={user.id}
+						/>
 					))
 				)}
 
@@ -114,6 +119,10 @@ const useMessageList = (channelId: string) => {
 		staleTime: 30_000,
 		refetchOnWindowFocus: false,
 	});
+
+	const {
+		data: { user },
+	} = useSuspenseQuery(orpc.workspace.list.queryOptions());
 
 	const messages = useMemo(() => {
 		return data?.pages?.flatMap((page) => page.items) ?? [];
@@ -240,5 +249,6 @@ const useMessageList = (channelId: string) => {
 		isAtBottom,
 		isEmpty,
 		isFetchingNextPage,
+		user,
 	};
 };
