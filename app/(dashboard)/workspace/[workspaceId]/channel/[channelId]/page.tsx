@@ -2,18 +2,21 @@
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { orpc } from '@/lib/orpc';
+import { ThreadProvider, useThreadContext } from '@/providers/thread-provider';
 import { KindeUser } from '@kinde-oss/kinde-auth-nextjs';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
 import { ChannelHeader } from './_components/channel-header';
 import { MessageList } from './_components/message-list';
 import { MessageInputForm } from './_components/message/message-input-form';
+import { ThreadSidebar } from './_components/thread/thread-sidebar';
 
 const ChannelPage = () => {
 	const { channelId } = useParams<{ channelId: string }>();
 	const { data, error, isLoading } = useQuery(
 		orpc.channel.get.queryOptions({ input: { channelId } })
 	);
+	const { isThreadOpen } = useThreadContext();
 
 	if (error) {
 		return <div>Something went wrong</div>;
@@ -50,8 +53,23 @@ const ChannelPage = () => {
 					/>
 				</div>
 			</div>
+
+			{/* Thread Sidebar */}
+			{isThreadOpen && (
+				<ThreadSidebar
+					user={data?.currentUser as KindeUser<Record<string, unknown>>}
+				/>
+			)}
 		</div>
 	);
 };
 
-export default ChannelPage;
+const ChannelPageWrapper = () => {
+	return (
+		<ThreadProvider>
+			<ChannelPage />
+		</ThreadProvider>
+	);
+};
+
+export default ChannelPageWrapper;

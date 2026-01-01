@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { useThreadContext } from '@/providers/thread-provider';
 import { MessageSquareText, Pencil } from 'lucide-react';
 import { FC } from 'react';
 
@@ -13,6 +14,8 @@ export const MessageHoverToolbar: FC<MessageHoverToolbarProps> = ({
 	canEdit,
 	onEdit,
 }) => {
+	const { toggleThread } = useThreadContext();
+
 	return (
 		<div className="absolute right-1 -top-3 items-center gap-1 rounded-md border border-gray-200 bg-white/95 px-1.5 py-1 shadow-sm backdrop-blur-sm transition-opacity opacity-0 group-hover:opacity-100 dark:border-neutral-800 dark:bg-neutral-900/90">
 			{canEdit && (
@@ -21,7 +24,11 @@ export const MessageHoverToolbar: FC<MessageHoverToolbarProps> = ({
 				</Button>
 			)}
 
-			<Button variant="ghost" size="icon">
+			<Button
+				variant="ghost"
+				size="icon"
+				onClick={() => toggleThread(messageId)}
+			>
 				<MessageSquareText className="size-4" />
 			</Button>
 		</div>
