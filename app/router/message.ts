@@ -1,6 +1,7 @@
 import prisma from '@/lib/db';
 import { Message } from '@/lib/generated/prisma/client';
 import { getAvatar } from '@/lib/get-avatar';
+import type { MessageListItem } from '@/lib/types';
 import z from 'zod';
 import { readSecurityMiddleware } from '../middlewares/arcjet/read';
 import { standardSecurityMiddleware } from '../middlewares/arcjet/standard.middleware';
@@ -92,7 +93,7 @@ export const listMessages = base
 	)
 	.output(
 		z.object({
-			items: z.array(z.custom<Message>()),
+			items: z.array(z.custom<MessageListItem>()),
 			nextCursor: z.string().optional(),
 		})
 	)
@@ -133,13 +134,35 @@ export const listMessages = base
 					id: 'desc',
 				},
 			],
+			include: {
+				_count: {
+					select: {
+						replies: true,
+					},
+				},
+			},
 		});
+
+		const items: MessageListItem[] = messages.map((message) => ({
+			id: message.id,
+			content: message.content,
+			createdAt: message.createdAt,
+			updatedAt: message.updatedAt,
+			threadId: message.threadId,
+			channelId: message.channelId,
+			authorId: message.authorId,
+			authorEmail: message.authorEmail,
+			authorName: message.authorName,
+			authorAvatar: message.authorAvatar,
+			imageUrl: message.imageUrl,
+			repliesCount: message._count.replies,
+		}));
 
 		const nextCursor =
 			messages.length === limit ? messages[messages.length - 1].id : undefined;
 
 		return {
-			items: messages,
+			items,
 			nextCursor,
 		};
 	});

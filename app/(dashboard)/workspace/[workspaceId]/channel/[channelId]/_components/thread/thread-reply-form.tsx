@@ -6,9 +6,14 @@ import { useAttachmentUpload } from '@/hooks/use-attachment-upload';
 import { Message } from '@/lib/generated/prisma/client';
 import { getAvatar } from '@/lib/get-avatar';
 import { orpc } from '@/lib/orpc';
+import { MessageListItem } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { KindeUser } from '@kinde-oss/kinde-auth-nextjs';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+	InfiniteData,
+	useMutation,
+	useQueryClient,
+} from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
 import { FC, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -45,6 +50,13 @@ export const ThreadReplyForm: FC<ThreadReplyFormProps> = ({
 	const createMessageMutation = useMutation(
 		orpc.message.create.mutationOptions({
 			onMutate: async (data) => {
+				type MessagePage = {
+					items: Array<MessageListItem>;
+					nextCursor?: string;
+				};
+
+				type InfiniteMessages = InfiniteData<MessagePage>;
+
 				const listOptions = orpc.message.thread.list.queryOptions({
 					input: {
 						messageId: threadId,
@@ -73,6 +85,31 @@ export const ThreadReplyForm: FC<ThreadReplyFormProps> = ({
 					if (!prevData) return prevData;
 					return { ...prevData, messages: [...prevData.messages, optimistic] };
 				});
+
+				// Optimistically bump repliesCount in main message list for the parent message
+				queryClient.setQueryData(
+					['message.list', channelId],
+					(prevData: InfiniteMessages) => {
+						if (!prevData) return prevData;
+
+						const pages = prevData.pages.map((page) => ({
+							...page,
+							items: page.items.map((message) =>
+								message.id === threadId
+									? {
+											...message,
+											repliesCount: message.repliesCount + 1,
+									  }
+									: message
+							),
+						}));
+
+						return {
+							...prevData,
+							pages,
+						};
+					}
+				);
 
 				return {
 					listOptions,
@@ -125,6 +162,7 @@ export const ThreadReplyForm: FC<ThreadReplyFormProps> = ({
 									onSubmit={() => onSubmit(form.getValues())}
 									upload={upload}
 									key={editorKey}
+									isSubmitting={createMessageMutation.isPending}
 								/>
 							</FormControl>
 						</FormItem>

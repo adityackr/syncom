@@ -1,13 +1,17 @@
 import { SafeContent } from '@/components/rich-text-editor/safe-content';
-import { Message } from '@/lib/generated/prisma/client';
 import { getAvatar } from '@/lib/get-avatar';
+import { orpc } from '@/lib/orpc';
+import type { MessageListItem } from '@/lib/types';
+import { useThreadContext } from '@/providers/thread-provider';
+import { useQueryClient } from '@tanstack/react-query';
+import { MessagesSquare } from 'lucide-react';
 import Image from 'next/image';
-import { FC, useState } from 'react';
+import { FC, useCallback, useState } from 'react';
 import { MessageHoverToolbar } from '../toolbar';
 import { EditMessage } from '../toolbar/edit-message';
 
 type MessageItemProps = {
-	message: Message;
+	message: MessageListItem;
 	currentUserId: string;
 };
 
@@ -16,6 +20,19 @@ export const MessageItem: FC<MessageItemProps> = ({
 	currentUserId,
 }) => {
 	const [isEditing, setIsEditing] = useState(false);
+	const { openThread } = useThreadContext();
+	const queryClient = useQueryClient();
+
+	const prefetchThread = useCallback(() => {
+		const options = orpc.message.thread.list.queryOptions({
+			input: {
+				messageId: message.id,
+			},
+		});
+		queryClient
+			.prefetchQuery({ ...options, staleTime: 60_000 })
+			.catch(() => {});
+	}, [message.id, queryClient]);
 
 	return (
 		<div className="flex space-x-3 relative p-3 group hover:bg-muted/50">
@@ -66,6 +83,25 @@ export const MessageItem: FC<MessageItemProps> = ({
 									className="rounded-md max-h-[320px] w-auto object-contain"
 								/>
 							</div>
+						)}
+
+						{message.repliesCount > 0 && (
+							<button
+								className="mt-1  inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-border cursor-pointer"
+								type="button"
+								onClick={() => openThread(message.id)}
+								onMouseEnter={prefetchThread}
+								onFocus={prefetchThread}
+							>
+								<MessagesSquare className="size-3.5" />
+								<span>
+									{message.repliesCount}{' '}
+									{message.repliesCount === 1 ? 'reply' : 'replies'}
+								</span>
+								<span className="opacity-0 group-hover:opacity-100 transition-opacity">
+									View Thread
+								</span>
+							</button>
 						)}
 					</>
 				)}
