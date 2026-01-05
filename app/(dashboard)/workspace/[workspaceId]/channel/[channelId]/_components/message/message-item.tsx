@@ -7,6 +7,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { MessagesSquare } from 'lucide-react';
 import Image from 'next/image';
 import { FC, useCallback, useState } from 'react';
+import { ReactionsBar } from '../reaction/reactions-bar';
 import { MessageHoverToolbar } from '../toolbar';
 import { EditMessage } from '../toolbar/edit-message';
 
@@ -85,7 +86,17 @@ export const MessageItem: FC<MessageItemProps> = ({
 							</div>
 						)}
 
-						{message.repliesCount > 0 && (
+						{/* Reactions */}
+						<ReactionsBar
+							messageId={message.id}
+							reactions={message.reactions}
+							context={{
+								type: 'list',
+								channelId: message.channelId!,
+							}}
+						/>
+
+						{message.replyCount > 0 && (
 							<button
 								className="mt-1  inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-border cursor-pointer"
 								type="button"
@@ -95,8 +106,8 @@ export const MessageItem: FC<MessageItemProps> = ({
 							>
 								<MessagesSquare className="size-3.5" />
 								<span>
-									{message.repliesCount}{' '}
-									{message.repliesCount === 1 ? 'reply' : 'replies'}
+									{message.replyCount}{' '}
+									{message.replyCount === 1 ? 'reply' : 'replies'}
 								</span>
 								<span className="opacity-0 group-hover:opacity-100 transition-opacity">
 									View Thread

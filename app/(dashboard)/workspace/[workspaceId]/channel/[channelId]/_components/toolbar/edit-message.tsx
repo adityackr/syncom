@@ -1,4 +1,7 @@
-import { UpdateMessage, UpdateMessageSchema } from '@/app/schemas/message';
+import {
+	UpdateMessage,
+	UpdateMessageSchema,
+} from '@/app/schemas/message.schema';
 import { RichTextEditor } from '@/components/rich-text-editor/editor';
 import { Button } from '@/components/ui/button';
 import {

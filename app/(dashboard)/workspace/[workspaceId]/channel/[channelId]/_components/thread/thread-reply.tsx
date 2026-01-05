@@ -1,13 +1,18 @@
 import { SafeContent } from '@/components/rich-text-editor/safe-content';
-import { Message } from '@/lib/generated/prisma/client';
+import { MessageListItem } from '@/lib/types';
 import Image from 'next/image';
 import { FC } from 'react';
+import { ReactionsBar } from '../reaction/reactions-bar';
 
 type ThreadReplyProps = {
-	message: Message;
+	message: MessageListItem;
+	selectedThreadId: string;
 };
 
-export const ThreadReply: FC<ThreadReplyProps> = ({ message }) => {
+export const ThreadReply: FC<ThreadReplyProps> = ({
+	message,
+	selectedThreadId,
+}) => {
 	return (
 		<div className="flex space-x-3 p-3 hover:bg-muted/30 rounded-lg">
 			<Image
@@ -48,6 +53,15 @@ export const ThreadReply: FC<ThreadReplyProps> = ({ message }) => {
 						/>
 					</div>
 				)}
+
+				<ReactionsBar
+					messageId={message.id}
+					context={{
+						type: 'thread',
+						threadId: selectedThreadId,
+					}}
+					reactions={message.reactions}
+				/>
 			</div>
 		</div>
 	);

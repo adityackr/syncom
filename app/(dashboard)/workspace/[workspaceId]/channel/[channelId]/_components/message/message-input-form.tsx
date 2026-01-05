@@ -1,6 +1,9 @@
 'use client';
 
-import { CreateMessageSchema, type CreateMessage } from '@/app/schemas/message';
+import {
+	CreateMessageSchema,
+	type CreateMessage,
+} from '@/app/schemas/message.schema';
 import {
 	Form,
 	FormControl,

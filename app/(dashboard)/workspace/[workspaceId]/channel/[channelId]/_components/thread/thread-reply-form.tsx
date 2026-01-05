@@ -1,9 +1,11 @@
 'use client';
 
-import { type CreateMessage, CreateMessageSchema } from '@/app/schemas/message';
+import {
+	type CreateMessage,
+	CreateMessageSchema,
+} from '@/app/schemas/message.schema';
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 import { useAttachmentUpload } from '@/hooks/use-attachment-upload';
-import { Message } from '@/lib/generated/prisma/client';
 import { getAvatar } from '@/lib/get-avatar';
 import { orpc } from '@/lib/orpc';
 import { MessageListItem } from '@/lib/types';
@@ -67,7 +69,7 @@ export const ThreadReplyForm: FC<ThreadReplyFormProps> = ({
 
 				const previous = queryClient.getQueryData(listOptions.queryKey);
 
-				const optimistic: Message = {
+				const optimistic: MessageListItem = {
 					id: `optimistic-${crypto.randomUUID()}`,
 					content: data.content,
 					createdAt: new Date(),
@@ -79,6 +81,8 @@ export const ThreadReplyForm: FC<ThreadReplyFormProps> = ({
 					channelId: data.channelId,
 					threadId: data.threadId!,
 					imageUrl: data.imageUrl ?? null,
+					replyCount: 0,
+					reactions: [],
 				};
 
 				queryClient.setQueryData(listOptions.queryKey, (prevData) => {
@@ -98,7 +102,7 @@ export const ThreadReplyForm: FC<ThreadReplyFormProps> = ({
 								message.id === threadId
 									? {
 											...message,
-											repliesCount: message.repliesCount + 1,
+											replyCount: message.replyCount + 1,
 									  }
 									: message
 							),
