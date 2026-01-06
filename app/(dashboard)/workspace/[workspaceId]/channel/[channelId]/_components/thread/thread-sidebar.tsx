@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ChevronDown, MessageSquare, X } from 'lucide-react';
 import Image from 'next/image';
 import { FC, useEffect, useRef, useState } from 'react';
+import { SummarizeThread } from './summarize-thread';
 import { ThreadReply } from './thread-reply';
 import { ThreadReplyForm } from './thread-reply-form';
 import { ThreadSidebarSkeleton } from './thread-sidebar-skeleton';
@@ -137,6 +138,7 @@ export const ThreadSidebar: FC<ThreadSidebarProps> = ({ user }) => {
 				</div>
 
 				<div className="flex items-center gap-2">
+					<SummarizeThread messageId={selectedThreadId!} />
 					<Button variant="outline" size="icon" onClick={closeThread}>
 						<X className="size-4" />
 					</Button>
