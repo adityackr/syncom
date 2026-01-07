@@ -141,6 +141,11 @@ export const HeroHeader = () => {
 												className={buttonVariants({
 													size: 'sm',
 												})}
+												authUrlParams={{
+													is_create_org: 'true',
+													org_name: 'My Workspace',
+													pricing_table_key: 'organization_plans',
+												}}
 											>
 												{isScrolled ? 'Get Started' : 'Sign Up'}
 											</RegisterLink>
