@@ -173,7 +173,7 @@ export const ReactionsBar: FC<ReactionsBarProps> = ({
 
 	return (
 		<div className="mt-1 flex items-center gap-1">
-			{reactions.map((reaction) => (
+			{reactions?.map((reaction) => (
 				<Button
 					key={reaction.emoji}
 					type="button"

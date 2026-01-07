@@ -8,7 +8,7 @@ import {
 } from '@kinde/management-api-js';
 import z from 'zod';
 import { heavyWriteSecurityMiddleware } from '../middlewares/arcjet/heavy-write.middleware';
-import { readSecurityMiddleware } from '../middlewares/arcjet/read';
+import { readSecurityMiddleware } from '../middlewares/arcjet/read.middleware';
 import { standardSecurityMiddleware } from '../middlewares/arcjet/standard.middleware';
 import { requiredAuthMiddleware } from '../middlewares/auth.middleware';
 import { base } from '../middlewares/base.middleware';

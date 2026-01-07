@@ -1,3 +1,4 @@
+import { markdownToJson } from '@/lib/markdown-to-json';
 import { cn } from '@/lib/utils';
 import { Editor, useEditorState } from '@tiptap/react';
 import {
@@ -19,6 +20,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '../ui/tooltip';
+import { ComposeAssistant } from './compose-assistant';
 
 type MenuBarProps = {
 	editor: Editor | null;
@@ -40,9 +42,20 @@ export const EditorMenuBar: FC<MenuBarProps> = ({ editor }) => {
 				isOrderedList: editor.isActive('orderedList'),
 				canUndo: editor.can().undo(),
 				canRedo: editor.can().redo(),
+				currentContent: editor.getJSON(),
 			};
 		},
 	});
+
+	const handleAccept = (markdown: string) => {
+		try {
+			const json = markdownToJson(markdown);
+
+			editor?.commands.setContent(json);
+		} catch {
+			console.log('Failed to convert markdown to json');
+		}
+	};
 
 	if (!editor) {
 		return null;
@@ -197,6 +210,13 @@ export const EditorMenuBar: FC<MenuBarProps> = ({ editor }) => {
 						</TooltipTrigger>
 						<TooltipContent>Redo</TooltipContent>
 					</Tooltip>
+				</div>
+				<div className="w-px h-6 bg-border mx-2"></div>
+				<div className="flex flex-wrap gap-1">
+					<ComposeAssistant
+						content={JSON.stringify(editorState?.currentContent)}
+						onAccept={handleAccept}
+					/>
 				</div>
 			</TooltipProvider>
 		</div>

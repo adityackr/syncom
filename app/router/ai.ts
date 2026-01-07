@@ -4,6 +4,7 @@ import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { streamToEventIterator } from '@orpc/server';
 import { streamText } from 'ai';
 import z from 'zod';
+import { aiSecurityMiddleware } from '../middlewares/arcjet/ai.middleware';
 import { requiredAuthMiddleware } from '../middlewares/auth.middleware';
 import { base } from '../middlewares/base.middleware';
 import { requiredWorkspaceMiddleware } from '../middlewares/workspace.middleware';
@@ -19,6 +20,7 @@ const model = openrouter.chat(MODEL_ID);
 export const generateThreadSummary = base
 	.use(requiredAuthMiddleware)
 	.use(requiredWorkspaceMiddleware)
+	.use(aiSecurityMiddleware)
 	.route({
 		method: 'GET',
 		path: '/ai/thread/summary',
@@ -126,6 +128,52 @@ export const generateThreadSummary = base
 				},
 			],
 			temperature: 0.2,
+		});
+
+		return streamToEventIterator(result.toUIMessageStream());
+	});
+
+export const generateAIComposition = base
+	.use(requiredAuthMiddleware)
+	.use(requiredWorkspaceMiddleware)
+	.use(aiSecurityMiddleware)
+	.route({
+		method: 'POST',
+		path: '/ai/compose/generate',
+		summary: 'Generate AI composition',
+		tags: ['AI'],
+	})
+	.input(
+		z.object({
+			content: z.string(),
+		})
+	)
+	.handler(async ({ input }) => {
+		const markdown = await tiptapJsonToMarkdown(input.content);
+
+		const system = [
+			'You are an expert rewriting assistant. You are not a chatbot.',
+			'Task: Rewrite the provided content to be clearer and better structured while preserving meaning, facts, technology, and names.',
+			'Do not address the user, ask questions, add greetings, or include commentary.',
+			'Keep existing links/mentions intact. Do not change code blocks or inline code content.',
+			'Output strictly in Markdown (paragraphs and optional bullet lists). Do not output any HTML or images',
+			'Return ONLY the rewritten content. No preamble, headings, or closing remarks.',
+		].join('\n');
+
+		const result = streamText({
+			model,
+			system,
+			messages: [
+				{
+					role: 'user',
+					content: 'Please rewrite and improve the following content:',
+				},
+				{
+					role: 'user',
+					content: markdown,
+				},
+			],
+			temperature: 0,
 		});
 
 		return streamToEventIterator(result.toUIMessageStream());
