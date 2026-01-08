@@ -1,3 +1,4 @@
+import { User } from '@/app/schemas/realtime.schema';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -6,13 +7,17 @@ import {
 	PopoverTrigger,
 } from '@/components/ui/popover';
 import { Skeleton } from '@/components/ui/skeleton';
+import { usePresence } from '@/hooks/use-presence';
 import { orpc } from '@/lib/orpc';
 import { useQuery } from '@tanstack/react-query';
 import { Search, Users } from 'lucide-react';
+import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import { MemberItem } from './member-item';
 
 export const MemberOverview = () => {
+	const params = useParams();
+
 	const [open, setOpen] = useState(false);
 	const [search, setSearch] = useState('');
 
@@ -20,9 +25,21 @@ export const MemberOverview = () => {
 		orpc.workspace.member.list.queryOptions()
 	);
 
-	if (error) {
-		return <h1>Error: {error.message}</h1>;
-	}
+	const { data: workspaceData } = useQuery(orpc.workspace.list.queryOptions());
+
+	const currentUser = !workspaceData?.user
+		? null
+		: ({
+				id: workspaceData.user.id,
+				full_name: workspaceData.user.given_name,
+				email: workspaceData.user.email,
+				picture: workspaceData.user.picture,
+		  } satisfies User);
+
+	const { onlineUsers } = usePresence({
+		room: `workspace-${params.workspaceId}`,
+		currentUser,
+	});
 
 	const members = data ?? [];
 
@@ -36,6 +53,12 @@ export const MemberOverview = () => {
 				);
 		  })
 		: members;
+
+	const onlineUserIds = new Set(onlineUsers.map((user) => user.id));
+
+	if (error) {
+		return <h1>Error: {error.message}</h1>;
+	}
 
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
@@ -85,7 +108,11 @@ export const MemberOverview = () => {
 							</p>
 						) : (
 							filteredMembers.map((member) => (
-								<MemberItem key={member.id} member={member} />
+								<MemberItem
+									key={member.id}
+									member={member}
+									isOnline={member.id ? onlineUserIds.has(member.id) : false}
+								/>
 							))
 						)}
 					</div>
