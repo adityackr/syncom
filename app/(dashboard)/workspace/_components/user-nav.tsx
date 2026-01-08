@@ -19,6 +19,7 @@ import {
 } from '@kinde-oss/kinde-auth-nextjs/components';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { CreditCard, LogOut, User } from 'lucide-react';
+import Image from 'next/image';
 
 export const UserNav = () => {
 	const {
@@ -54,9 +55,11 @@ export const UserNav = () => {
 			>
 				<DropdownMenuLabel className="font-normal flex items-center gap-2 px-1 py-1.5 text-left text-sm">
 					<Avatar className="relative size-8 rounded-lg">
-						<AvatarImage
+						<Image
 							src={getAvatar(user.picture, user.email!)}
 							alt={user.email!}
+							width={32}
+							height={32}
 							className="object-cover"
 						/>
 						<AvatarFallback>
