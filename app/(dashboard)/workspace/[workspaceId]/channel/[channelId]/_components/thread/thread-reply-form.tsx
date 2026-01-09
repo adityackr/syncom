@@ -9,6 +9,7 @@ import { useAttachmentUpload } from '@/hooks/use-attachment-upload';
 import { getAvatar } from '@/lib/get-avatar';
 import { orpc } from '@/lib/orpc';
 import { MessageListItem } from '@/lib/types';
+import { useChannelRealtime } from '@/providers/channel-realtime-provider';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { KindeUser } from '@kinde-oss/kinde-auth-nextjs';
 import {
@@ -35,6 +36,7 @@ export const ThreadReplyForm: FC<ThreadReplyFormProps> = ({
 	const upload = useAttachmentUpload();
 	const [editorKey, setEditorKey] = useState(0);
 	const queryClient = useQueryClient();
+	const { send } = useChannelRealtime();
 
 	const form = useForm({
 		resolver: zodResolver(CreateMessageSchema),
@@ -128,7 +130,13 @@ export const ThreadReplyForm: FC<ThreadReplyFormProps> = ({
 				form.reset({ channelId, content: '', threadId });
 				upload.clear();
 				setEditorKey((prev) => prev + 1);
-				return toast.success('Message created successfully');
+				send({
+					type: 'message:replies:increment',
+					payload: {
+						messageId: threadId,
+						delta: 1,
+					},
+				});
 			},
 			onError: (_error, _vars, context) => {
 				if (!context) return;

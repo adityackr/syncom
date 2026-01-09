@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/form';
 import { Message } from '@/lib/generated/prisma/client';
 import { orpc } from '@/lib/orpc';
+import { useChannelRealtime } from '@/providers/channel-realtime-provider';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
 	InfiniteData,
@@ -34,6 +35,7 @@ export const EditMessage: FC<EditMessageProps> = ({
 	onCancel,
 	onSave,
 }) => {
+	const { send } = useChannelRealtime();
 	const queryClient = useQueryClient();
 	const form = useForm({
 		resolver: zodResolver(UpdateMessageSchema),
@@ -77,6 +79,10 @@ export const EditMessage: FC<EditMessageProps> = ({
 					}
 				);
 				toast.success('Message updated successfully');
+				send({
+					type: 'message:updated',
+					payload: { message: updated.message },
+				});
 				onSave();
 			},
 			onError: (error) => {

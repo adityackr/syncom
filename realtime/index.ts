@@ -1,4 +1,5 @@
 import {
+	ChannelEventSchema,
 	PresenceMessageSchema,
 	UserSchema,
 } from '@/app/schemas/realtime.schema';
@@ -65,6 +66,16 @@ export class Chat extends Server {
 
 					return;
 				}
+			}
+
+			const channelEvent = ChannelEventSchema.safeParse(parsedMessage);
+
+			if (channelEvent.success) {
+				const payload = JSON.stringify(channelEvent.data);
+
+				this.broadcast(payload, [connection.id]);
+
+				return;
 			}
 		} catch (error) {
 			console.error('Error parsing message:', error);

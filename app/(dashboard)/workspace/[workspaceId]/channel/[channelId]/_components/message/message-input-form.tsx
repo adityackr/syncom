@@ -15,6 +15,7 @@ import { useAttachmentUpload } from '@/hooks/use-attachment-upload';
 import { Message } from '@/lib/generated/prisma/client';
 import { getAvatar } from '@/lib/get-avatar';
 import { orpc } from '@/lib/orpc';
+import { useChannelRealtime } from '@/providers/channel-realtime-provider';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { KindeUser } from '@kinde-oss/kinde-auth-nextjs';
 import {
@@ -45,8 +46,8 @@ export const MessageInputForm: FC<MessageInputFormProps> = ({
 }) => {
 	const queryClient = useQueryClient();
 	const [editorKey, setEditorKey] = useState(0);
-
 	const upload = useAttachmentUpload();
+	const { send } = useChannelRealtime();
 
 	const form = useForm<CreateMessage>({
 		resolver: zodResolver(CreateMessageSchema),
@@ -143,6 +144,8 @@ export const MessageInputForm: FC<MessageInputFormProps> = ({
 				form.reset({ channelId, content: '' });
 				upload.clear();
 				setEditorKey((prev) => prev + 1);
+
+				send({ type: 'message:created', payload: { message: data } });
 			},
 			onError: (_error, _variables, context) => {
 				if (context?.previousData) {
