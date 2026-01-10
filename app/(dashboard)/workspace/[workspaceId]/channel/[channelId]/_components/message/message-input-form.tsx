@@ -82,6 +82,7 @@ export const MessageInputForm: FC<MessageInputFormProps> = ({
 					authorName: user.given_name ?? 'John Doe',
 					authorAvatar: getAvatar(user.picture, user.email!),
 					channelId,
+					threadId: null,
 				};
 
 				queryClient.setQueryData(

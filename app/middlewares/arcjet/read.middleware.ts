@@ -1,4 +1,5 @@
 import arcjet, { slidingWindow } from '@/lib/arcjet';
+import { ArcjetNextRequest } from '@arcjet/next';
 import { KindeUser } from '@kinde-oss/kinde-auth-nextjs';
 import { base } from '../base.middleware';
 
@@ -12,7 +13,10 @@ const buildReadAj = () =>
 	);
 
 export const readSecurityMiddleware = base
-	.$context<{ request: Request; user: KindeUser<Record<string, unknown>> }>()
+	.$context<{
+		request: Request | ArcjetNextRequest;
+		user: KindeUser<Record<string, unknown>>;
+	}>()
 	.middleware(async ({ context, next, errors }) => {
 		const decision = await buildReadAj().protect(context.request, {
 			userId: context.user.id,

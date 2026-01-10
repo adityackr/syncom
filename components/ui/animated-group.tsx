@@ -1,7 +1,6 @@
-/* eslint-disable react-hooks/static-components */
 'use client';
 import { motion, Variants } from 'motion/react';
-import React, { JSX, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 
 export type PresetType =
 	| 'fade'
@@ -115,14 +114,13 @@ function AnimatedGroup({
 	const containerVariants = variants?.container || selectedVariants.container;
 	const itemVariants = variants?.item || selectedVariants.item;
 
-	const MotionComponent = React.useMemo(
-		() => motion.create(as as keyof JSX.IntrinsicElements),
-		[as]
-	);
-	const MotionChild = React.useMemo(
-		() => motion.create(asChild as keyof JSX.IntrinsicElements),
-		[asChild]
-	);
+	// Access pre-existing motion components instead of creating new ones
+	const MotionComponent = motion[
+		as as keyof typeof motion
+	] as typeof motion.div;
+	const MotionChild = motion[
+		asChild as keyof typeof motion
+	] as typeof motion.div;
 
 	return (
 		<MotionComponent

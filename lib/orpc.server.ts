@@ -1,9 +1,14 @@
 import 'server-only';
 
 import { router } from '@/app/router';
+import { request } from '@arcjet/next';
 import { createRouterClient } from '@orpc/server';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 
-globalThis.$client = createRouterClient(router, {});
+globalThis.$client = createRouterClient(router, {
+	context: async () => ({
+		request: await request(),
+	}),
+});

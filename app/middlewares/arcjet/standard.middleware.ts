@@ -1,4 +1,5 @@
 import arcjet, { detectBot, shield } from '@/lib/arcjet';
+import { ArcjetNextRequest } from '@arcjet/next';
 import { KindeUser } from '@kinde-oss/kinde-auth-nextjs';
 import { base } from '../base.middleware';
 
@@ -21,7 +22,10 @@ const buildStandardAj = () =>
 		);
 
 export const standardSecurityMiddleware = base
-	.$context<{ request: Request; user: KindeUser<Record<string, unknown>> }>()
+	.$context<{
+		request: Request | ArcjetNextRequest;
+		user: KindeUser<Record<string, unknown>>;
+	}>()
 	.middleware(async ({ context, next, errors }) => {
 		const decision = await buildStandardAj().protect(context.request, {
 			userId: context.user.id,
