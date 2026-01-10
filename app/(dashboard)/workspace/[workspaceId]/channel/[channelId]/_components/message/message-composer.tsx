@@ -25,6 +25,7 @@ export const MessageComposer: FC<MessageComposerProps> = ({
 		<>
 			<RichTextEditor
 				field={{ value, onChange }}
+				onEnter={onSubmit}
 				sendButton={
 					<Button
 						type="button"

@@ -106,6 +106,7 @@ export const EditMessage: FC<EditMessageProps> = ({
 							<FormControl>
 								<RichTextEditor
 									field={field}
+									onEnter={form.handleSubmit(onSubmit)}
 									sendButton={
 										<div className="flex items-center gap-2">
 											<Button

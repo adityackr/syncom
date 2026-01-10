@@ -10,12 +10,14 @@ type RichTextEditorProps = {
 	field: any;
 	sendButton: ReactNode;
 	footerLeft?: ReactNode;
+	onEnter?: () => void;
 };
 
 export const RichTextEditor: FC<RichTextEditorProps> = ({
 	field,
 	sendButton,
 	footerLeft,
+	onEnter,
 }) => {
 	const editor = useEditor({
 		immediatelyRender: false,
@@ -35,6 +37,15 @@ export const RichTextEditor: FC<RichTextEditorProps> = ({
 		},
 		extensions: editorExtensions,
 		editorProps: {
+			handleKeyDown: (_view, event) => {
+				if (event.key === 'Enter' && !event.shiftKey) {
+					if (onEnter) {
+						onEnter();
+						return true;
+					}
+				}
+				return false;
+			},
 			attributes: {
 				class:
 					'!max-w-none min-h-[125px] focus:outline-none p-4 prose dark:prose-invert marker:text-primary',
