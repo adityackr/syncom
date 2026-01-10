@@ -10,6 +10,7 @@ import { getAvatar } from '@/lib/get-avatar';
 import { orpc } from '@/lib/orpc';
 import { MessageListItem } from '@/lib/types';
 import { useChannelRealtime } from '@/providers/channel-realtime-provider';
+import { useThreadRealtime } from '@/providers/thread-realtime-provider';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { KindeUser } from '@kinde-oss/kinde-auth-nextjs';
 import {
@@ -37,6 +38,7 @@ export const ThreadReplyForm: FC<ThreadReplyFormProps> = ({
 	const [editorKey, setEditorKey] = useState(0);
 	const queryClient = useQueryClient();
 	const { send } = useChannelRealtime();
+	const { send: sendThread } = useThreadRealtime();
 
 	const form = useForm({
 		resolver: zodResolver(CreateMessageSchema),
@@ -122,7 +124,7 @@ export const ThreadReplyForm: FC<ThreadReplyFormProps> = ({
 					previous,
 				};
 			},
-			onSuccess: (_data, _vars, context) => {
+			onSuccess: (data, _vars, context) => {
 				queryClient.invalidateQueries({
 					queryKey: context.listOptions.queryKey,
 				});
@@ -130,6 +132,14 @@ export const ThreadReplyForm: FC<ThreadReplyFormProps> = ({
 				form.reset({ channelId, content: '', threadId });
 				upload.clear();
 				setEditorKey((prev) => prev + 1);
+
+				sendThread({
+					type: 'thread:reply:created',
+					payload: {
+						reply: data,
+					},
+				});
+
 				send({
 					type: 'message:replies:increment',
 					payload: {

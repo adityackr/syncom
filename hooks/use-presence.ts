@@ -15,7 +15,7 @@ export const usePresence = ({ room, currentUser }: usePresenceProps) => {
 	const [onlineUsers, setOnlineUsers] = useState<User[]>([]);
 
 	const socket = usePartySocket({
-		host: 'http://localhost:8787',
+		host: 'https://syncom-chat-realtime.acborty1991.workers.dev',
 		room,
 		party: 'chat',
 		onOpen() {

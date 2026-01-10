@@ -34,7 +34,7 @@ export const ChannelRealtimeProvider = ({
 	const queryClient = useQueryClient();
 
 	const socket = usePartySocket({
-		host: 'http://localhost:8787',
+		host: 'https://syncom-chat-realtime.acborty1991.workers.dev',
 		room: `channel-${channelId}`,
 		party: 'chat',
 		onMessage(e) {

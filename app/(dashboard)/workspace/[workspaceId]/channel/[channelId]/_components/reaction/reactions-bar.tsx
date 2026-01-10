@@ -4,6 +4,7 @@ import { orpc } from '@/lib/orpc';
 import { MessageListItem } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useChannelRealtime } from '@/providers/channel-realtime-provider';
+import { useOptionalThreadRealtime } from '@/providers/thread-realtime-provider';
 import {
 	InfiniteData,
 	useMutation,
@@ -45,6 +46,7 @@ export const ReactionsBar: FC<ReactionsBarProps> = ({
 	const { channelId } = useParams<{ channelId: string }>();
 	const queryClient = useQueryClient();
 	const { send } = useChannelRealtime();
+	const threadRealtime = useOptionalThreadRealtime();
 
 	const toggleMutation = useMutation(
 		orpc.message.reaction.toggle.mutationOptions({
@@ -155,6 +157,14 @@ export const ReactionsBar: FC<ReactionsBarProps> = ({
 					type: 'reaction:updated',
 					payload: data,
 				});
+
+				if (context && context.type === 'thread' && threadRealtime) {
+					const threadId = context.threadId;
+					threadRealtime.send({
+						type: 'thread:reaction:updated',
+						payload: { ...data, threadId },
+					});
+				}
 			},
 			onError: (_err, _vars, ctx) => {
 				if (ctx?.threadQueryKey && ctx.previous) {
